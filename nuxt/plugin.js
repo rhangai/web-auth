@@ -1,7 +1,7 @@
 import { AuthContainer } from "<%= options.lib %>";
 import AuthContainerConfig from "<%= options.config %>";
 
-export default function(context, inject) {
+export default async function(context, inject) {
 	const authContainerConfig =
 		typeof AuthContainerConfig === "function"
 			? AuthContainerConfig(context)

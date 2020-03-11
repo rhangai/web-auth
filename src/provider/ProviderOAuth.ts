@@ -3,7 +3,7 @@ import { IAuthProvider } from "../../types/Provider";
 export type SchemeOAuthOptions<TUser = any> = {
 	axios: any;
 	clientId: string;
-	clientSecret?: string;
+	clientSecret?: string | null;
 	endpoint: string;
 	getUser(state: ProviderOAuthState): Promise<TUser> | TUser;
 };
@@ -27,9 +27,9 @@ export class ProviderOAuth<TUser = any>
 	constructor(private readonly options: SchemeOAuthOptions<TUser>) {}
 
 	async login(payload: ProviderOAuthPayload) {
-		const data: Record<string, string> = {
+		const data: Record<string, string | undefined | null> = {
 			client_id: this.options.clientId,
-			client_secret: this.options.clientSecret ?? "",
+			client_secret: this.options.clientSecret,
 			scope: payload.scope
 		};
 		if (payload.grantType === "password") {
@@ -63,7 +63,7 @@ export class ProviderOAuth<TUser = any>
 	async refresh(state: ProviderOAuthState) {
 		if (!state.refreshToken) return { state: null };
 
-		const data: Record<string, string> = {
+		const data: Record<string, string | undefined | null> = {
 			grant_type: "refresh_token",
 			client_id: this.options.clientId,
 			client_secret: this.options.clientSecret ?? "",
@@ -83,7 +83,7 @@ export class ProviderOAuth<TUser = any>
 		};
 	}
 
-	static toQueryString(obj: Record<string, string>): string {
+	static toQueryString(obj: Record<string, string | undefined | null>): string {
 		const parts: string[] = [];
 		for (const key in obj) {
 			const value = obj[key];

@@ -1,7 +1,7 @@
-import { IAuthContainer } from '../types/AuthContainer';
-import { IAuthScheme } from '../types/Scheme';
-import { IAuthStorage } from '../types/Storage';
-import { IAuthPlugin } from '../types/Plugin';
+import { IAuthContainer } from "../types/AuthContainer";
+import { IAuthScheme } from "../types/Scheme";
+import { IAuthStorage } from "../types/Storage";
+import { IAuthPlugin } from "../types/Plugin";
 
 export type AuthContainerOptions = {
 	scheme: IAuthScheme;

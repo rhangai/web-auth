@@ -7,8 +7,12 @@ export default function(context, inject) {
 			? AuthContainerConfig(context)
 			: AuthContainerConfig;
 	const $auth = new AuthContainer({ ...authContainerConfig });
+	setupPlugins($auth, context);
 	inject("auth", $auth);
+	await $auth.init();
+}
 
+function setupPlugins($auth, context) {
 	/* <% if (options.plugins) { %> */
 	/* <% if (options.plugins.store) { %>  */
 	{

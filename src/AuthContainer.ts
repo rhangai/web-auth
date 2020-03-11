@@ -1,10 +1,10 @@
 import { IAuthContainer } from "../types/AuthContainer";
-import { IAuthScheme } from "../types/Scheme";
+import { IAuthProvider } from "../types/Provider";
 import { IAuthStorage } from "../types/Storage";
 import { IAuthPlugin } from "../types/Plugin";
 
 export type AuthContainerOptions = {
-	scheme: IAuthScheme;
+	provider: IAuthProvider;
 	storage: IAuthStorage;
 	plugins?: IAuthPlugin[];
 };
@@ -20,6 +20,9 @@ export class AuthContainer implements IAuthContainer {
 		}
 	}
 
+	/**
+	 * Initialize the authenticator
+	 */
 	async init() {
 		const state = await this.options.storage.load();
 		const result = this._refreshFromResult({ state });
@@ -27,16 +30,19 @@ export class AuthContainer implements IAuthContainer {
 	}
 
 	async login(payload: any): Promise<any> {
-		const loginResult = await this.options.scheme.login({ payload });
+		const loginResult = await this.options.provider.login(payload, {});
 		const result = await this._refreshFromResult(loginResult);
 		if (!result) return false;
 		await this._save(result);
 		return true;
 	}
 
+	/**
+	 * Perform the logout
+	 */
 	async logout() {
 		if (this.state) {
-			await this.options.scheme.logout(this.state);
+			await this.options.provider.logout(this.state);
 		}
 		await this._save({ state: null, user: null });
 	}
@@ -74,14 +80,14 @@ export class AuthContainer implements IAuthContainer {
 		if (!state) {
 			return null;
 		}
-		const result = await this.options.scheme.getUser(state);
+		const result = await this.options.provider.getUser(state);
 		return result.user;
 	}
 
 	private async _refreshState(state: any): Promise<any> {
 		if (!state) return false;
-		if (!this.options.scheme.refresh) return false;
-		const result = await this.options.scheme.refresh(state);
+		if (!this.options.provider.refresh) return false;
+		const result = await this.options.provider.refresh(state);
 		return await this._refreshFromResult(result);
 	}
 

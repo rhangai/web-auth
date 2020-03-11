@@ -7,7 +7,12 @@ export default function(moduleOptions) {
 		src: path.resolve(__dirname, "plugin.js"),
 		options: {
 			lib: options.lib || packageJson.name,
-			config: options.config
+			config: options.config,
+			plugins: {
+				axios: options.axios !== false,
+				apollo: options.apollo !== false,
+				store: options.store == null ? "auth" : options.store
+			}
 		}
 	});
 }

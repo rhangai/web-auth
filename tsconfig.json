@@ -4,8 +4,9 @@
 		"moduleResolution": "node",
 		"target": "es2018",
 		"lib": ["es2018", "dom"],
-		"rootDir": ".",
+		"rootDir": "src",
 		"strict": true,
-		"esModuleInterop": true
+		"declaration": true,
+		"outDir": "lib"
 	}
 }

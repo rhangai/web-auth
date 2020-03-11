@@ -1,4 +1,4 @@
-import { IAuthScheme } from '../../types/Scheme';
+import { IAuthScheme } from "../../types/Scheme";
 
 export type SchemeOAuthOptions = {
 	url: string;

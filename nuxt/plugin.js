@@ -16,6 +16,7 @@ export default function(context, inject) {
 		if (store) {
 			const storeName = "<%= options.store %>" || "auth";
 			store.registerModule(storeName, {
+				namespaced: true,
 				state() {
 					return { user: null };
 				},

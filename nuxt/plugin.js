@@ -1,12 +1,10 @@
 import { AuthContainer } from '<%= options.AuthContainer %>';
-// @ts-ignore
-// import { Storage } from '<%= options.storage.module %>';
-// @ts-ignore
+import { <%= options.storage.moduleImport %> as Storage } from '<%= options.storage.module %>';
 import { <%= options.scheme.moduleImport %> as Scheme } from '<%= options.scheme.module %>';
 
 export default function({ store }, inject) {
 	const $auth = new AuthContainer({
-		storage: null, // new Storage(<%= options.storage %>),
+		storage: new Storage(<%= options.storage %>),
 		scheme: new Scheme(<%= options.scheme %>),
 	});
 	inject('auth', $auth);

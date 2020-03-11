@@ -1,5 +1,5 @@
 export interface IAuthStorage<TState = any> {
-	save(state: TState): Promise<void>;
+	save(state: TState | null): Promise<void>;
 
-	load(): Promise<TState>;
+	load(): Promise<TState | null>;
 }

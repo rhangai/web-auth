@@ -8,12 +8,12 @@ export class SchemeOAuth implements IAuthScheme {
 	constructor(private readonly options: SchemeOAuthOptions) {}
 
 	async login(options: any) {
-		return { state: null };
+		return { state: { token: "123456" } };
 	}
 
 	async logout() {}
 
 	async getUser() {
-		return { user: null };
+		return { user: { id: 1 } };
 	}
 }

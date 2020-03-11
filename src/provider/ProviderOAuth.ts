@@ -27,21 +27,23 @@ export class ProviderOAuth<TUser = any>
 	constructor(private readonly options: SchemeOAuthOptions<TUser>) {}
 
 	async login(payload: ProviderOAuthPayload) {
-		const data = new FormData();
-		data.append("client_id", this.options.clientId);
-		data.append("client_secret", this.options.clientSecret ?? "");
+		const data: Record<string, string> = {
+			client_id: this.options.clientId,
+			client_secret: this.options.clientSecret ?? "",
+			scope: payload.scope
+		};
 		if (payload.grantType === "password") {
-			data.append("grant_type", payload.grantType);
-			data.append("username", payload.username);
-			data.append("password", payload.password);
+			data.grant_type = payload.grantType;
+			data.username = payload.username;
+			data.password = payload.password;
 		} else {
 			throw new Error(`Invalid grantType ${payload.grantType}`);
 		}
-		data.append("scope", payload.scope);
 		const response = await this.options.axios({
 			method: "post",
 			url: this.options.endpoint,
-			data
+			data: ProviderOAuth.toQueryString(data),
+			headers: { "content-type": "application/x-www-form-urlencoded" }
 		});
 		return {
 			state: {
@@ -61,15 +63,17 @@ export class ProviderOAuth<TUser = any>
 	async refresh(state: ProviderOAuthState) {
 		if (!state.refreshToken) return { state: null };
 
-		const data = new FormData();
-		data.append("grant_type", "refresh_token");
-		data.append("client_id", this.options.clientId);
-		data.append("client_secret", this.options.clientSecret ?? "");
-		data.append("refresh_token", state.refreshToken);
+		const data: Record<string, string> = {
+			grant_type: "refresh_token",
+			client_id: this.options.clientId,
+			client_secret: this.options.clientSecret ?? "",
+			refresh_token: state.refreshToken
+		};
 		const response = await this.options.axios({
 			method: "post",
 			url: this.options.endpoint,
-			data
+			data: ProviderOAuth.toQueryString(data),
+			headers: { "content-type": "application/x-www-form-urlencoded" }
 		});
 		return {
 			state: {
@@ -77,5 +81,15 @@ export class ProviderOAuth<TUser = any>
 				refreshToken: response.data.refresh_token || null
 			}
 		};
+	}
+
+	static toQueryString(obj: Record<string, string>): string {
+		const parts: string[] = [];
+		for (const key in obj) {
+			const value = obj[key];
+			if (value == null) continue;
+			parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+		}
+		return parts.join("&");
 	}
 }

@@ -104,7 +104,12 @@ export class AuthContainer implements IAuthContainer {
 	private async _save({ state, user }: any) {
 		this.state = state ?? null;
 		this.user = user ?? null;
-		await this.options.storage.save(this.state);
+		if (!this.state) {
+			await this.options.storage.clear();
+		} else {
+			await this.options.storage.save(this.state);
+		}
+
 		if (this.plugins) {
 			await Promise.all(this.plugins.map(plugin => plugin({ state, user })));
 		}

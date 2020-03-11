@@ -7,12 +7,16 @@ export class StorageCookies implements IAuthStorage {
 		this.cookieName = options.cookieName || "_s";
 	}
 
-	async save(state: any): Promise<void> {
+	save(state: any) {
 		StorageCookies.cookieSet(this.cookieName, state);
 	}
 
-	async load(): Promise<any> {
+	load() {
 		return StorageCookies.cookieGet(this.cookieName);
+	}
+
+	clear() {
+		StorageCookies.cookieSet(this.cookieName, "");
 	}
 
 	private static cookieGet(name: string) {

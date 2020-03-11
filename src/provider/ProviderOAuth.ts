@@ -1,12 +1,11 @@
 import { IAuthProvider } from "../../types/Provider";
 
-export type SchemeOAuthOptions = {
+export type SchemeOAuthOptions<TUser = any> = {
 	axios: any;
-	grantType: string;
 	clientId: string;
 	clientSecret?: string;
-	url: string;
-	getUser(state: any): any;
+	endpoint: string;
+	getUser(state: ProviderOAuthState): Promise<TUser> | TUser;
 };
 
 export type ProviderOAuthState = {
@@ -14,26 +13,34 @@ export type ProviderOAuthState = {
 	refreshToken: string | null;
 };
 
-export type ProviderOAuthPayload = {
+export type ProviderOAuthPayloadPassword = {
+	grantType: "password";
 	username: string;
 	password: string;
+	scope: string;
 };
+
+export type ProviderOAuthPayload = ProviderOAuthPayloadPassword;
 
 export class ProviderOAuth<TUser = any>
 	implements IAuthProvider<TUser, ProviderOAuthState, ProviderOAuthPayload> {
-	constructor(private readonly options: SchemeOAuthOptions) {}
+	constructor(private readonly options: SchemeOAuthOptions<TUser>) {}
 
 	async login(payload: ProviderOAuthPayload) {
 		const data = new FormData();
-		data.append("grant_type", this.options.grantType);
 		data.append("client_id", this.options.clientId);
 		data.append("client_secret", this.options.clientSecret ?? "");
-		data.append("username", this.options.clientSecret ?? "");
-		data.append("password", this.options.clientSecret ?? "");
-		data.append("scope", this.options.clientSecret ?? "");
+		if (payload.grantType === "password") {
+			data.append("grant_type", payload.grantType);
+			data.append("username", payload.username);
+			data.append("password", payload.password);
+		} else {
+			throw new Error(`Invalid grantType ${payload.grantType}`);
+		}
+		data.append("scope", payload.scope);
 		const response = await this.options.axios({
 			method: "post",
-			url: this.options.url,
+			url: this.options.endpoint,
 			data
 		});
 		return {
@@ -46,6 +53,11 @@ export class ProviderOAuth<TUser = any>
 
 	async logout() {}
 
+	async getUser(state: ProviderOAuthState) {
+		const user: TUser = await this.options.getUser(state);
+		return { user };
+	}
+
 	async refresh(state: ProviderOAuthState) {
 		if (!state.refreshToken) return { state: null };
 
@@ -56,7 +68,7 @@ export class ProviderOAuth<TUser = any>
 		data.append("refresh_token", state.refreshToken);
 		const response = await this.options.axios({
 			method: "post",
-			url: this.options.url,
+			url: this.options.endpoint,
 			data
 		});
 		return {
@@ -65,10 +77,5 @@ export class ProviderOAuth<TUser = any>
 				refreshToken: response.data.refresh_token || null
 			}
 		};
-	}
-
-	async getUser(state: ProviderOAuthState) {
-		const user: TUser = await this.options.getUser(state);
-		return { user };
 	}
 }

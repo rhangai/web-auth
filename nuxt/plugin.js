@@ -1,25 +1,24 @@
-import { AuthContainer } from '<%= options.AuthContainer %>';
-import { <%= options.storage.moduleImport %> as Storage } from '<%= options.storage.module %>';
-import { <%= options.scheme.moduleImport %> as Scheme } from '<%= options.scheme.module %>';
+import { AuthContainer } from "<%= options.lib %>";
+import AuthContainerConfig from "<%= options.config %>";
 
 export default function({ store }, inject) {
-	const $auth = new AuthContainer({
-		storage: new Storage(<%= JSON.stringify(options.storage.options) %>),
-		scheme: new Scheme(<%= JSON.stringify(options.scheme.options) %>),
-	});
-	inject('auth', $auth);
+	const $auth = new AuthContainer(AuthContainerConfig);
+	inject("auth", $auth);
 
-	store.registerModule('__auth', {
-		state() {
-			return { user: null };
-		},
-		mutations: {
-			SET_USER(state, payload) {
-				state.user = payload.user;
+	/// Adds vuex plugin
+	if (store) {
+		store.registerModule("__auth", {
+			state() {
+				return { user: null };
 			},
-		},
-	});
-	$auth.addPlugin(({ user }) => {
-		store.commit('__auth/SET_USER', { user });
-	});
+			mutations: {
+				SET_USER(state, payload) {
+					state.user = payload.user;
+				}
+			}
+		});
+		$auth.addPlugin(({ user }) => {
+			store.commit("__auth/SET_USER", { user });
+		});
+	}
 }

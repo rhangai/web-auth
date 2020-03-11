@@ -1,10 +1,11 @@
 const path = require("path");
 
 export default function() {
-	this.addPlugin({
-		src: path.resolve(__dirname, "plugin.js"),
+	let pluginConfigFilename = null;
+
+	const pluginConfigTemplate = this.addTemplate({
+		src: path.resolve(__dirname, "pluginConfig.js"),
 		options: {
-			AuthContainer: path.resolve(__dirname, "../lib/"),
 			scheme: {
 				module: path.resolve(__dirname, "../lib/scheme/SchemeOAuth"),
 				moduleImport: "SchemeOAuth",
@@ -15,6 +16,15 @@ export default function() {
 				moduleImport: "StorageCookies",
 				options: {}
 			}
+		}
+	});
+	pluginConfigFilename = pluginConfigTemplate.dist;
+
+	this.addPlugin({
+		src: path.resolve(__dirname, "plugin.js"),
+		options: {
+			lib: path.resolve(__dirname, "../lib/"),
+			config: pluginConfigFilename
 		}
 	});
 }

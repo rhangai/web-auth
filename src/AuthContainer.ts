@@ -6,6 +6,7 @@ import { IAuthPlugin } from "../types/Plugin";
 export type AuthContainerOptions = {
 	scheme: IAuthScheme;
 	storage: IAuthStorage;
+	plugins?: IAuthPlugin[];
 };
 
 export class AuthContainer implements IAuthContainer {
@@ -13,7 +14,11 @@ export class AuthContainer implements IAuthContainer {
 	private state: any = null;
 	private plugins: IAuthPlugin[] = [];
 
-	constructor(private readonly options: AuthContainerOptions) {}
+	constructor(private readonly options: AuthContainerOptions) {
+		if (options.plugins) {
+			this.plugins = [...options.plugins];
+		}
+	}
 
 	async init() {
 		const state = await this.options.storage.load();

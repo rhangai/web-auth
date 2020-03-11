@@ -10,7 +10,7 @@ export default function(context, inject) {
 	inject("auth", $auth);
 
 	/* <% if (options.plugins) { %> */
-	/* <% if (options.store) { %>  */
+	/* <% if (options.plugins.store) { %>  */
 	{
 		const store = context.store;
 		if (store) {
@@ -32,7 +32,7 @@ export default function(context, inject) {
 	}
 	/* <% } %> */
 
-	/* <% if (options.axios) { %> */
+	/* <% if (options.plugins.axios) { %> */
 	{
 		$auth.addPlugin(({ state }) => {
 			const axios = context.app.$axios;
@@ -46,7 +46,7 @@ export default function(context, inject) {
 	}
 	/* <% } %> */
 
-	/* <% if (options.apollo) { %> */
+	/* <% if (options.plugins.apollo) { %> */
 	{
 		$auth.addPlugin(({ state }) => {
 			const apolloHelpers = context.app.$apolloHelpers;

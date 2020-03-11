@@ -4,8 +4,8 @@ import { <%= options.scheme.moduleImport %> as Scheme } from '<%= options.scheme
 
 export default function({ store }, inject) {
 	const $auth = new AuthContainer({
-		storage: new Storage(<%= options.storage %>),
-		scheme: new Scheme(<%= options.scheme %>),
+		storage: new Storage(<%= JSON.stringify(options.storage.options) %>),
+		scheme: new Scheme(<%= JSON.stringify(options.scheme.options) %>),
 	});
 	inject('auth', $auth);
 

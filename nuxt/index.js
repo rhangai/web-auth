@@ -6,11 +6,13 @@ export default function() {
 		options: {
 			scheme: {
 				module: path.resolve(__dirname, "../lib/scheme/SchemeOAuth"),
-				moduleImport: "SchemeOAuth"
+				moduleImport: "SchemeOAuth",
+				options: {}
 			},
 			storage: {
 				module: path.resolve(__dirname, "../lib/storage/StorageCookies"),
-				moduleImport: "StorageCookies"
+				moduleImport: "StorageCookies",
+				options: {}
 			}
 		}
 	});

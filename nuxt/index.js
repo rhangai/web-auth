@@ -18,8 +18,7 @@ export default function() {
 			}
 		}
 	});
-	pluginConfigFilename = pluginConfigTemplate.dst;
-	console.log(this, pluginConfigTemplate);
+	pluginConfigFilename = path.resolve(this.options.buildDir, pluginConfigTemplate.dst);
 
 	this.addPlugin({
 		src: path.resolve(__dirname, "plugin.js"),

@@ -2,8 +2,7 @@ const path = require("path");
 const packageJson = require("../package.json");
 
 export default function(moduleOptions) {
-	const options = moduleOptions || this.options.auth;
-	console.log(options);
+	const options = { ...this.options.auth, ...moduleOptions };
 	this.addPlugin({
 		src: path.resolve(__dirname, "plugin.js"),
 		options: {

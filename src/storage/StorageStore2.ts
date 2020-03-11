@@ -2,20 +2,27 @@ import { IAuthStorage } from "../../types/Storage";
 
 export type StorageStore2Options = {
 	store: any;
-	key: string;
+	key?: string;
 };
 
 export class StorageStore2 implements IAuthStorage {
-	constructor(private readonly options: StorageStore2Options) {}
+	private readonly store: any;
+	private readonly key: string;
+
+	constructor(options: StorageStore2Options) {
+		this.store = options.store;
+		this.key = options.key || "auth";
+	}
+
 	save(state: any) {
-		this.options.store.set(this.options.key, state);
+		this.store.set(this.key, state);
 	}
 
 	load() {
-		return this.options.store.get(this.options.key);
+		return this.store.get(this.key);
 	}
 
 	clear() {
-		this.options.store.remove(this.options.key);
+		this.store.remove(this.key);
 	}
 }

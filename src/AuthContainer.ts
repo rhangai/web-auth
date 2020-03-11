@@ -1,4 +1,8 @@
-import { IAuthContainer, IAuthContainerRefreshOptions } from "../types/AuthContainer";
+import {
+	IAuthContainer,
+	IAuthContainerRefreshOptions,
+	IAuthContainerLoginResult
+} from "../types/AuthContainer";
 import { IAuthProvider } from "../types/Provider";
 import { IAuthStorage } from "../types/Storage";
 import { IAuthPlugin } from "../types/Plugin";
@@ -29,12 +33,12 @@ export class AuthContainer implements IAuthContainer {
 		if (result) await this._save(result);
 	}
 
-	async login(payload: any): Promise<any> {
+	async login(payload: any): Promise<IAuthContainerLoginResult | false> {
 		const loginResult = await this.options.provider.login(payload, {});
 		const result = await this._refreshFromResult(loginResult);
 		if (!result) return false;
 		await this._save(result);
-		return true;
+		return { redirectUri: loginResult.redirectUri };
 	}
 
 	/**
@@ -53,12 +57,15 @@ export class AuthContainer implements IAuthContainer {
 	async refresh(options: IAuthContainerRefreshOptions = {}) {
 		const user = await this._getUser(this.state);
 		if (!user) {
+			// If no user was found, try to get a new token
 			const result = await this._refreshState(this.state);
 			if (!result) {
 				await this.logout();
 				return false;
 			}
+			await this._save(result);
 		} else if (options.renew === true) {
+			// If renew is passed, try to get a new token anyway
 			const result = await this._refreshState(this.state);
 			if (result) {
 				await this._save(result);
@@ -93,6 +100,7 @@ export class AuthContainer implements IAuthContainer {
 		if (!state) return false;
 		if (!this.options.provider.refresh) return false;
 		const result = await this.options.provider.refresh(state);
+		if (!result) return false;
 		return await this._refreshFromResult(result);
 	}
 

@@ -3,6 +3,7 @@ type IAuthProviderLoginOptions = {};
 type IAuthProviderLogin<TUser = any, TState = any> = {
 	state: TState | null;
 	user?: TUser | null;
+	redirectUri?: string | null;
 };
 
 type IAuthProviderData<TUser = any> = {
@@ -28,5 +29,5 @@ export interface IAuthProvider<TUser = any, TState = any, TPayload = any> {
 	/**
 	 * Revalidate the request and perform a refresh
 	 */
-	refresh?(state: TState): Promise<IAuthProviderLogin<TUser, TState>>;
+	refresh?(state: TState): Promise<IAuthProviderLogin<TUser, TState> | false>;
 }

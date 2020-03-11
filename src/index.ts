@@ -1,1 +1,1 @@
-export { AuthContainer } from "./AuthContainer";
+export { AuthContainer, AuthContainerOptions } from "./AuthContainer";

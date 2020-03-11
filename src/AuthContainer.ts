@@ -50,7 +50,7 @@ export class AuthContainer implements IAuthContainer {
 	/**
 	 * Perform the refresh
 	 */
-	async refresh({ renew }: IAuthContainerRefreshOptions) {
+	async refresh(options: IAuthContainerRefreshOptions = {}) {
 		const user = await this._getUser(this.state);
 		if (!user) {
 			const result = await this._refreshState(this.state);
@@ -58,7 +58,7 @@ export class AuthContainer implements IAuthContainer {
 				await this.logout();
 				return false;
 			}
-		} else if (renew === true) {
+		} else if (options.renew === true) {
 			const result = await this._refreshState(this.state);
 			if (result) {
 				await this._save(result);

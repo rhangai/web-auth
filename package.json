@@ -1,6 +1,6 @@
 {
   "name": "@rhangai/web-auth",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Authentication handler for nuxt",
   "repository": "https://github.com/rhangai/web-auth.git",
   "author": "rhangai <hangai.renan@gmail.com>",

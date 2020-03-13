@@ -9,9 +9,27 @@ export type IAuthContainerLoginResult = {
 };
 
 export interface IAuthContainer {
+	/**
+	 * Initialize the application with saved data
+	 */
 	init(): Promise<void>;
+	/**
+	 * Perform the login
+	 * @param payload Payload requested by provider
+	 */
 	login(payload: any): Promise<IAuthContainerLoginResult | false>;
+	/**
+	 * Perform the logout
+	 */
 	logout(): Promise<void>;
-	refresh(options: IAuthContainerRefreshOptions): Promise<boolean>;
+	/**
+	 * Refresh the authentication data
+	 * @param options
+	 */
+	refresh(options?: IAuthContainerRefreshOptions): Promise<boolean>;
+	/**
+	 * Adds a new plugin to listen for auth changes
+	 * @param plugin
+	 */
 	addPlugin(plugin: IAuthPlugin): void;
 }

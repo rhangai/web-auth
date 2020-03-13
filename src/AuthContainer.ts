@@ -13,10 +13,14 @@ export type AuthContainerOptions = {
 	plugins?: IAuthPlugin[];
 };
 
+/// Time where the data is valid after initialization
+const INITIALIZATION_REFRESH_TIME_THRESHOLD = 5000;
+
 export class AuthContainer implements IAuthContainer {
 	private user: any = null;
 	private state: any = null;
 	private plugins: IAuthPlugin[] = [];
+	private refreshValidUntil: number | false = false;
 
 	constructor(private readonly options: AuthContainerOptions) {
 		if (options.plugins) {
@@ -30,7 +34,10 @@ export class AuthContainer implements IAuthContainer {
 	async init() {
 		const state = await this.options.storage.load();
 		const result = await this._refreshFromResult({ state });
-		if (result) await this._save(result);
+		if (result) {
+			await this._save(result);
+			this.refreshValidUntil = Date.now() + INITIALIZATION_REFRESH_TIME_THRESHOLD;
+		}
 	}
 
 	async login(payload: any): Promise<IAuthContainerLoginResult | false> {
@@ -55,6 +62,13 @@ export class AuthContainer implements IAuthContainer {
 	 * Perform the refresh
 	 */
 	async refresh(options: IAuthContainerRefreshOptions = {}) {
+		if (this.refreshValidUntil) {
+			const isValid = this.refreshValidUntil >= Date.now();
+			this.refreshValidUntil = false;
+			if (isValid) {
+				return true;
+			}
+		}
 		const user = await this._getUser(this.state);
 		if (!user) {
 			// If no user was found, try to get a new token
@@ -117,6 +131,7 @@ export class AuthContainer implements IAuthContainer {
 	private async _save({ state, user }: any) {
 		this.state = state ?? null;
 		this.user = user ?? null;
+		this.refreshValidUntil = false;
 		if (!this.state) {
 			await this.options.storage.clear();
 		} else {

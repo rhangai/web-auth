@@ -43,7 +43,7 @@ function setupPlugins($auth, context) {
 			const axios = context.app.$axios;
 			if (!axios) return;
 			if (state && state.token) {
-				axios.setToken(state.token);
+				axios.setToken(state.token, "Bearer");
 			} else {
 				axios.setToken(false);
 			}

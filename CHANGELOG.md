@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5](https://github.com/rhangai/web-auth/compare/v0.0.4...v0.0.5) (2020-03-16)
+
+
+### Bug Fixes
+
+* Bearer plugin when authenticating with axios ([c0be58d](https://github.com/rhangai/web-auth/commit/c0be58d4f9bd9826f3ca7ea186673e715078b46c))
+
 ### [0.0.4](https://github.com/rhangai/web-auth/compare/v0.0.3...v0.0.4) (2020-03-13)
 
 ### [0.0.3](https://github.com/rhangai/web-auth/compare/v0.0.2...v0.0.3) (2020-03-13)

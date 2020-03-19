@@ -1,6 +1,4 @@
-import { IAuthStorage } from "../../types/Storage";
-
-export class StorageCookies implements IAuthStorage {
+export class StorageCookies {
 	private cookieName: string;
 
 	constructor(options: any = {}) {

@@ -1,31 +1,33 @@
 import {
-	IAuthContainer,
-	IAuthContainerRefreshOptions,
-	IAuthContainerLoginResult
-} from "../types/AuthContainer";
-import { IAuthProvider } from "../types/Provider";
-import { IAuthStorage } from "../types/Storage";
-import { IAuthPlugin } from "../types/Plugin";
+	AuthProvider,
+	AuthStorage,
+	AuthPlugin,
+	AuthStore,
+	AuthUser,
+	AuthState
+} from "./Interfaces";
 
 export type AuthContainerOptions = {
-	provider: IAuthProvider;
-	storage: IAuthStorage;
-	plugins?: IAuthPlugin[];
+	provider: AuthProvider;
+	storage: AuthStorage;
+	plugins?: AuthPlugin[];
 };
 
-/// Time where the data is valid after initialization
-const INITIALIZATION_REFRESH_TIME_THRESHOLD = 5000;
+type AuthContainerSetStoreOptions = {
+	user: AuthUser | null;
+	state: AuthState | null;
+};
 
-export class AuthContainer implements IAuthContainer {
-	private user: any = null;
-	private state: any = null;
-	private plugins: IAuthPlugin[] = [];
-	private refreshValidUntil: number | false = false;
+/**
+ * Container for authentication
+ */
+export class AuthContainer {
+	private store: AuthStore = null;
+	private plugins: AuthPlugin[];
 
+	/// Construct
 	constructor(private readonly options: AuthContainerOptions) {
-		if (options.plugins) {
-			this.plugins = [...options.plugins];
-		}
+		this.plugins = options.plugins ? [...options.plugins] : [];
 	}
 
 	/**
@@ -33,113 +35,86 @@ export class AuthContainer implements IAuthContainer {
 	 */
 	async init() {
 		const state = await this.options.storage.load();
-		const result = await this._refreshFromResult({ state });
-		if (result) {
-			await this._save(result);
-			this.refreshValidUntil = Date.now() + INITIALIZATION_REFRESH_TIME_THRESHOLD;
-		}
-	}
-
-	async login(payload: any): Promise<IAuthContainerLoginResult | false> {
-		const loginResult = await this.options.provider.login(payload, {});
-		const result = await this._refreshFromResult(loginResult);
-		if (!result) return false;
-		await this._save(result);
-		return { redirectUri: loginResult.redirectUri };
+		const user = await this._refreshUser(state);
+		await this._setStore({ state, user });
 	}
 
 	/**
-	 * Perform the logout
+	 * Perform th elogin
+	 * @param payload
+	 */
+	async login(payload: any): Promise<void> {
+		const result = await this.options.provider.login(payload);
+		if (!result || !result.state) return;
+		const state = result.state;
+		let user = result.user;
+		if (!user) {
+			user = await this._refreshUser(state);
+		}
+		await this._setStore({ state, user });
+	}
+
+	/**
+	 * Logs out of the system by setting the value to null
 	 */
 	async logout() {
-		if (this.state) {
-			await this.options.provider.logout(this.state);
-		}
-		await this._save({ state: null, user: null });
+		await this._setStore(null);
 	}
 
 	/**
-	 * Perform the refresh
+	 * Refresh the current authenticator and ensures
 	 */
-	async refresh(options: IAuthContainerRefreshOptions = {}) {
-		if (this.refreshValidUntil) {
-			const isValid = this.refreshValidUntil >= Date.now();
-			this.refreshValidUntil = false;
-			if (isValid) {
-				return true;
-			}
-		}
-		const user = await this._getUser(this.state);
-		if (!user) {
-			// If no user was found, try to get a new token
-			const result = await this._refreshState(this.state);
-			if (!result) {
-				await this.logout();
-				return false;
-			}
-			await this._save(result);
-		} else if (options.renew === true) {
-			// If renew is passed, try to get a new token anyway
-			const result = await this._refreshState(this.state);
-			if (result) {
-				await this._save(result);
-			}
-		}
-		return true;
+	async refresh() {
+		if (!this.store) return false;
+
+		return null;
 	}
+
 	/**
-	 * Perform the refresh
+	 * Add a new plugin to the container
 	 */
-	getUser() {
-		return this.user;
-	}
-
-	addPlugin(plugin: IAuthPlugin) {
-		this.plugins.push(plugin);
+	async addPlugin(plugin: AuthPlugin | null) {
+		if (plugin) this.plugins.push(plugin);
 	}
 
 	/**
-	 *
+	 * Get the user from the state
 	 * @param state
 	 */
-	private async _getUser(state: any) {
-		if (!state) {
-			return null;
+	private async _refreshUser(state: any): Promise<any> {
+		if (!state) return null;
+		try {
+			const user = await this.options.provider.getUser(state);
+			return user;
+		} catch (err) {
+			if (err.statusCode == 401 || err.statusCode == 403) {
+				return null;
+			}
+			throw err;
 		}
-		const result = await this.options.provider.getUser(state);
-		return result.user;
 	}
 
-	private async _refreshState(state: any): Promise<any> {
-		if (!state) return false;
-		if (!this.options.provider.refresh) return false;
-		const result = await this.options.provider.refresh(state);
-		if (!result) return false;
-		return await this._refreshFromResult(result);
-	}
-
-	private async _refreshFromResult(result: any): Promise<any> {
-		if (!result) return null;
-		if (!result.state) return null;
-		if (!result.user) {
-			result.user = await this._getUser(result.state);
-			if (!result.user) return null;
-		}
-		return result;
-	}
-
-	private async _save({ state, user }: any) {
-		this.state = state ?? null;
-		this.user = user ?? null;
-		this.refreshValidUntil = false;
-		if (!this.state) {
-			await this.options.storage.clear();
+	/**
+	 * Save the state of the store
+	 */
+	private async _setStore(store: AuthContainerSetStoreOptions | null) {
+		if (!store || !store.state || !store.user) {
+			this.store = null;
 		} else {
-			await this.options.storage.save(this.state);
+			this.store = { state: store.state, user: store.user };
+		}
+		if (this.store) {
+			await this.options.storage.save(this.store.state);
+		} else {
+			await this.options.storage.clear();
 		}
 
-		if (this.plugins) {
-			await Promise.all(this.plugins.map(plugin => plugin({ state, user })));
+		for (const plugin of this.plugins) {
+			try {
+				await plugin(this.store);
+			} catch (err) {
+				console.error(err);
+			}
 		}
 	}
 }

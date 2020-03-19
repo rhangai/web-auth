@@ -1,5 +1,3 @@
-import { IAuthProvider } from "../../types/Provider";
-
 export type ProviderOAuthPasswordOptions<TUser = any> = {
 	axios: any;
 	clientId: string;
@@ -23,8 +21,7 @@ export type ProviderOAuthPasswordPayload = {
 /**
  * Provider for OAuth using axios
  */
-export class ProviderOAuthPassword<TUser = any>
-	implements IAuthProvider<TUser, ProviderOAuthPasswordState, ProviderOAuthPasswordPayload> {
+export class ProviderOAuthPassword<TUser = any> {
 	constructor(private readonly options: ProviderOAuthPasswordOptions<TUser>) {}
 
 	/**

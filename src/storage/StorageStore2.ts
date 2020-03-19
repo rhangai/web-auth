@@ -1,11 +1,9 @@
-import { IAuthStorage } from "../../types/Storage";
-
 export type StorageStore2Options = {
 	store: any;
 	key?: string;
 };
 
-export class StorageStore2 implements IAuthStorage {
+export class StorageStore2 {
 	private readonly store: any;
 	private readonly key: string;
 

@@ -6,6 +6,8 @@
 		"lib": ["es2018", "dom"],
 		"rootDir": "src",
 		"strict": true,
+		"declaration": true,
+		"outDir": "lib",
 		"types": ["@types/jest"]
 	},
 	"include": ["src"]

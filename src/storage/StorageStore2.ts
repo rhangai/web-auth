@@ -1,9 +1,11 @@
+import { AuthStorage } from "../Interfaces";
+
 export type StorageStore2Options = {
 	store: any;
 	key?: string;
 };
 
-export class StorageStore2 {
+export class StorageStore2 implements AuthStorage {
 	private readonly store: any;
 	private readonly key: string;
 

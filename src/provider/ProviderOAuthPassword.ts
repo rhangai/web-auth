@@ -1,17 +1,27 @@
-export type ProviderOAuthPasswordOptions<TUser = any> = {
+import { AuthProvider } from "../Interfaces";
+
+export type ProviderOAuthPasswordOptions = {
 	axios: any;
 	clientId: string;
 	clientSecret?: string | null;
 	tokenEndpoint: string;
+	/// Implements token refresh on OAUTH
 	tokenRefresh?: boolean;
-	getUser(state: ProviderOAuthPasswordState): Promise<TUser> | TUser;
+	/// Get the current user
+	getUser(state: ProviderOAuthPasswordState): Promise<Record<string, any>> | Record<string, any>;
 };
 
+/**
+ * State to keep
+ */
 export type ProviderOAuthPasswordState = {
 	token: string;
 	refreshToken: string | null;
 };
 
+/**
+ * Payload
+ */
 export type ProviderOAuthPasswordPayload = {
 	username: string;
 	password: string;
@@ -21,8 +31,8 @@ export type ProviderOAuthPasswordPayload = {
 /**
  * Provider for OAuth using axios
  */
-export class ProviderOAuthPassword<TUser = any> {
-	constructor(private readonly options: ProviderOAuthPasswordOptions<TUser>) {}
+export class ProviderOAuthPassword implements AuthProvider {
+	constructor(private readonly options: ProviderOAuthPasswordOptions) {}
 
 	/**
 	 * Try to login using the authorization code
@@ -51,16 +61,14 @@ export class ProviderOAuthPassword<TUser = any> {
 		};
 	}
 
-	async logout() {}
-
 	async getUser(state: ProviderOAuthPasswordState) {
-		const user: TUser = await this.options.getUser(state);
-		return { user };
+		const user = await this.options.getUser(state);
+		return user;
 	}
 
-	async refresh(state: ProviderOAuthPasswordState) {
-		if (!this.options.tokenRefresh) return false;
-		if (!state.refreshToken) return { state: null };
+	async renew(state: ProviderOAuthPasswordState) {
+		if (!this.options.tokenRefresh) return null;
+		if (!state.refreshToken) return null;
 
 		const data: Record<string, string | undefined | null> = {
 			grant_type: "refresh_token",

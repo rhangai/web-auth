@@ -1,10 +1,12 @@
 import { AuthContainer } from "./AuthContainer";
-import { take, last } from "rxjs/operators";
+import { MockProvider } from "./mocks/MockProvider";
+import { MockStorage } from "./mocks/MockStorage";
+
 describe("AuthContainer", () => {
 	it("should be instantiated", () => {
 		const authContainer = new AuthContainer({
-			provider: null,
-			storage: null
+			provider: new MockProvider(),
+			storage: new MockStorage()
 		});
 		expect(authContainer).toBeInstanceOf(AuthContainer);
 	});

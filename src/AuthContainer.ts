@@ -14,8 +14,8 @@ export type AuthContainerOptions = {
 };
 
 type AuthContainerSetStoreOptions = {
-	user: AuthUser | null;
-	state: AuthState | null;
+	state?: AuthState | null;
+	user?: AuthUser | null;
 };
 
 /**
@@ -23,6 +23,7 @@ type AuthContainerSetStoreOptions = {
  */
 export class AuthContainer {
 	private store: AuthStore = null;
+	private storeInitValidUntil: number | null = null;
 	private plugins: AuthPlugin[];
 
 	/// Construct
@@ -35,69 +36,92 @@ export class AuthContainer {
 	 */
 	async init() {
 		const state = await this.options.storage.load();
-		const user = await this._refreshUser(state);
-		await this._setStore({ state, user });
+		const isValid = await this._storeRefresh({ state });
+		if (isValid) {
+			this.storeInitValidUntil = +new Date() + 5000;
+		}
 	}
 
 	/**
 	 * Perform th elogin
 	 * @param payload
 	 */
-	async login(payload: any): Promise<void> {
+	async login(payload: any): Promise<boolean> {
 		const result = await this.options.provider.login(payload);
-		if (!result || !result.state) return;
-		const state = result.state;
-		let user = result.user;
-		if (!user) {
-			user = await this._refreshUser(state);
-		}
-		await this._setStore({ state, user });
+		return this._storeRefresh(result);
 	}
 
 	/**
 	 * Logs out of the system by setting the value to null
 	 */
 	async logout() {
-		await this._setStore(null);
+		if (this.store) await this.options.provider.logout?.(this.store.state);
+		await this._storeSet(null);
+	}
+
+	/**
+	 * Logs out of the system by setting the value to null
+	 */
+	async renew(): Promise<boolean> {
+		return this._renew(this.store);
 	}
 
 	/**
 	 * Refresh the current authenticator and ensures
 	 */
-	async refresh() {
+	async refresh(): Promise<boolean> {
 		if (!this.store) return false;
+		if (this.storeInitValidUntil) {
+			const now = +new Date();
+			const isValidInit = now < this.storeInitValidUntil;
+			this.storeInitValidUntil = null;
+			if (isValidInit) return true;
+		}
+		const store = this.store;
+		const isValid = await this._storeRefresh({ state: this.store.state });
+		if (isValid) return true;
+		return this._renew(store);
+	}
 
-		return null;
+	/**
+	 * Logs out of the system by setting the value to null
+	 */
+	private async _renew(store: AuthStore): Promise<boolean> {
+		if (!store) return false;
+		const result = await this.options.provider.renew?.(store.state);
+		if (!result) return false;
+		return this._storeRefresh(result);
 	}
 
 	/**
 	 * Add a new plugin to the container
 	 */
-	async addPlugin(plugin: AuthPlugin | null) {
+	addPlugin(plugin: AuthPlugin | null): void {
 		if (plugin) this.plugins.push(plugin);
 	}
 
 	/**
-	 * Get the user from the state
-	 * @param state
+	 * Refresh the store
 	 */
-	private async _refreshUser(state: any): Promise<any> {
-		if (!state) return null;
-		try {
-			const user = await this.options.provider.getUser(state);
-			return user;
-		} catch (err) {
-			if (err.statusCode == 401 || err.statusCode == 403) {
-				return null;
-			}
-			throw err;
+	async _storeRefresh(store: AuthContainerSetStoreOptions | null): Promise<boolean> {
+		if (!store || !store.state) {
+			await this._storeSet(null);
+			return false;
 		}
+		const state = store.state;
+		let user = store.user;
+		if (!user) {
+			user = await this._userGet(state);
+		}
+		await this._storeSet({ state, user });
+		return !!this.store;
 	}
 
 	/**
 	 * Save the state of the store
 	 */
-	private async _setStore(store: AuthContainerSetStoreOptions | null) {
+	private async _storeSet(store: AuthContainerSetStoreOptions | null) {
+		this.storeInitValidUntil = null;
 		if (!store || !store.state || !store.user) {
 			this.store = null;
 		} else {
@@ -115,6 +139,22 @@ export class AuthContainer {
 			} catch (err) {
 				console.error(err);
 			}
+		}
+	}
+	/**
+	 * Get the user from the state
+	 * @param state
+	 */
+	private async _userGet(state: any): Promise<any> {
+		if (!state) return null;
+		try {
+			const user = await this.options.provider.getUser(state);
+			return user;
+		} catch (err) {
+			if (err.statusCode == 401 || err.statusCode == 403) {
+				return null;
+			}
+			throw err;
 		}
 	}
 }

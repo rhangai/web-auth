@@ -1,4 +1,6 @@
-export class StorageCookies {
+import { AuthStorage } from "../Interfaces";
+
+export class StorageCookies implements AuthStorage {
 	private cookieName: string;
 
 	constructor(options: any = {}) {

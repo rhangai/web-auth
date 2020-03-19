@@ -19,7 +19,7 @@ export type AuthProviderLoginResult = {
 	/**
 	 * User
 	 */
-	user: AuthUser | null;
+	user?: AuthUser | null;
 };
 
 /**
@@ -30,11 +30,15 @@ export interface AuthProvider {
 	 * Perform the login using the payload
 	 * @param payload
 	 */
-	login(payload: Record<string, string>): PromiseOrValue<AuthProviderLoginResult>;
+	login(payload: Record<string, string>): PromiseOrValue<AuthProviderLoginResult | null>;
 	/**
 	 * Do a logout
 	 */
-	logout(): PromiseOrValue<void>;
+	logout?(state: AuthState): PromiseOrValue<void>;
+	/**
+	 * Renew the state
+	 */
+	renew?(state: AuthState): PromiseOrValue<AuthProviderLoginResult | null>;
 	/**
 	 * Get the user according with the state
 	 * @param state

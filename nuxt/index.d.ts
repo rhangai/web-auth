@@ -1,18 +1,18 @@
 import Vue from "vue";
 import { NuxtAppOptions } from "@nuxt/types/app";
-import { IAuthContainer } from "../types/AuthContainer";
+import { AuthContainer } from "../";
 
 /**
  * Extends the VueInterface
  */
 declare module "vue/types/vue" {
 	interface Vue {
-		$auth: IAuthContainer;
+		$auth: AuthContainer;
 	}
 }
 
 declare module "@nuxt/types/app" {
 	interface NuxtAppOptions {
-		$auth: IAuthContainer;
+		$auth: AuthContainer;
 	}
 }

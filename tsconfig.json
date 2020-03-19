@@ -9,6 +9,5 @@
 		"declaration": true,
 		"outDir": "lib",
 		"types": ["@types/jest"]
-	},
-	"include": ["src"]
+	}
 }

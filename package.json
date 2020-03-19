@@ -23,7 +23,6 @@
     "rimraf": "^3.0.2",
     "rollup": "^2.0.0",
     "rollup-plugin-babel": "^4.3.3",
-    "rxjs": "^6.5.4",
     "standard-version": "^7.1.0",
     "ts-jest": "^25.2.1",
     "tslib": "^1.11.1",
@@ -33,7 +32,7 @@
   "scripts": {
     "clean": "rimraf lib",
     "prebuild": "run-s clean",
-    "build:tsc": "tsc",
+    "build:tsc": "tsc -p tsconfig.build.json",
     "build:bundle": "rollup -c rollup.config.js",
     "build": "run-s build:tsc build:bundle",
     "release": "standard-version",

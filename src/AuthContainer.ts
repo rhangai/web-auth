@@ -4,7 +4,7 @@ import {
 	AuthPlugin,
 	AuthStore,
 	AuthUser,
-	AuthState
+	AuthState,
 } from "./Interfaces";
 
 export type AuthContainerOptions = {
@@ -34,10 +34,10 @@ export class AuthContainer {
 	/**
 	 * Initialize the authenticator
 	 */
-	async init() {
+	async init(hasInitializationDelay?: boolean) {
 		const state = await this.options.storage.load();
 		const isValid = await this._storeRefresh({ state });
-		if (isValid) {
+		if (isValid && hasInitializationDelay !== false) {
 			this.storeInitValidUntil = +new Date() + 5000;
 		}
 	}

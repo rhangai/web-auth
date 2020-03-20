@@ -1,6 +1,6 @@
 {
   "name": "@rhangai/web-auth",
-  "version": "0.0.5",
+  "version": "1.0.0-beta.1",
   "description": "Authentication handler for nuxt",
   "repository": "https://github.com/rhangai/web-auth.git",
   "author": "rhangai <hangai.renan@gmail.com>",
@@ -36,7 +36,7 @@
     "build:bundle": "rollup -c rollup.config.js",
     "build": "run-s build:tsc build:bundle",
     "release": "standard-version",
-    "prepack": "run-s build",
+    "prepare": "run-s build",
     "test": "jest"
   }
 }

@@ -27,11 +27,11 @@ function setupPlugins($auth, context) {
 				mutations: {
 					SET_USER(state, payload) {
 						state.user = payload.user;
-					}
-				}
+					},
+				},
 			});
-			$auth.addPlugin(({ user }) => {
-				store.commit(storeName + "/SET_USER", { user });
+			$auth.addPlugin(authStore => {
+				store.commit(storeName + "/SET_USER", { user: authStore ? authStore.user : null });
 			});
 		}
 	}
@@ -39,11 +39,11 @@ function setupPlugins($auth, context) {
 
 	/* <% if (options.plugins.axios) { %> */
 	{
-		$auth.addPlugin(({ state }) => {
+		$auth.addPlugin(authStore => {
 			const axios = context.app.$axios;
 			if (!axios) return;
-			if (state && state.token) {
-				axios.setToken(state.token, "Bearer");
+			if (authStore) {
+				axios.setToken(authStore.state.token, "Bearer");
 			} else {
 				axios.setToken(false);
 			}
@@ -53,13 +53,13 @@ function setupPlugins($auth, context) {
 
 	/* <% if (options.plugins.apollo) { %> */
 	{
-		$auth.addPlugin(({ state }) => {
+		$auth.addPlugin(authStore => {
 			const apolloHelpers = context.app.$apolloHelpers;
 			if (!apolloHelpers) return;
-			if (state && state.token) {
-				apolloHelpers.onLogin(state.token);
+			if (authStore) {
+				return apolloHelpers.onLogin(authStore.state.token);
 			} else {
-				apolloHelpers.onLogout();
+				return apolloHelpers.onLogout();
 			}
 		});
 	}

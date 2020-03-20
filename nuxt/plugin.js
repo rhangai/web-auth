@@ -9,7 +9,12 @@ export default async function(context, inject) {
 	const $auth = new AuthContainer({ ...authContainerConfig });
 	setupPlugins($auth, context);
 	inject("auth", $auth);
-	await $auth.init();
+
+	try {
+		await $auth.init();
+	} catch (err) {
+		context.error({ message: "Error initializing authenticator" });
+	}
 }
 
 function setupPlugins($auth, context) {

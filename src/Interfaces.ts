@@ -36,6 +36,10 @@ export interface AuthProvider {
 	 */
 	logout?(state: AuthState): PromiseOrValue<void>;
 	/**
+	 * Check if needs to renew the authentication
+	 */
+	needToRenew?(state: AuthState): PromiseOrValue<boolean>;
+	/**
 	 * Renew the state
 	 */
 	renew?(state: AuthState): PromiseOrValue<AuthProviderLoginResult | null>;

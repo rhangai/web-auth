@@ -36,10 +36,7 @@ export class AuthContainer {
 	 */
 	async init(hasInitializationDelay?: boolean) {
 		const state = await this.options.storage.load();
-		let isValid = await this._storeRefresh({ state });
-		if (!isValid) {
-			isValid = await this._renew(state);
-		}
+		const isValid = await this._storeRefreshRenew(state);
 		if (isValid && hasInitializationDelay !== false) {
 			this.storeInitValidUntil = +new Date() + 5000;
 		}
@@ -80,10 +77,24 @@ export class AuthContainer {
 			this.storeInitValidUntil = null;
 			if (isValidInit) return true;
 		}
-		const store = this.store;
-		const isValid = await this._storeRefresh({ state: this.store.state });
-		if (isValid) return true;
-		return this._renew(store?.state);
+		return this._storeRefreshRenew(this.store?.state);
+	}
+
+	/**
+	 * Refresh the store and renew if needed
+	 */
+	async _storeRefreshRenew(state: AuthState | undefined | null): Promise<boolean> {
+		if (!state) return false;
+		let isValid = await this._storeRefresh({ state });
+		if (isValid) {
+			const needRenew = !!(await this.options.provider.needToRenew?.(state));
+			if (needRenew) {
+				await this._renew(state);
+			}
+		} else if (!isValid) {
+			isValid = await this._renew(state);
+		}
+		return isValid;
 	}
 
 	/**

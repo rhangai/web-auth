@@ -36,7 +36,10 @@ export class AuthContainer {
 	 */
 	async init(hasInitializationDelay?: boolean) {
 		const state = await this.options.storage.load();
-		const isValid = await this._storeRefresh({ state });
+		let isValid = await this._storeRefresh({ state });
+		if (!isValid) {
+			isValid = await this._renew(state);
+		}
 		if (isValid && hasInitializationDelay !== false) {
 			this.storeInitValidUntil = +new Date() + 5000;
 		}
@@ -63,7 +66,7 @@ export class AuthContainer {
 	 * Logs out of the system by setting the value to null
 	 */
 	async renew(): Promise<boolean> {
-		return this._renew(this.store);
+		return this._renew(this.store?.state);
 	}
 
 	/**
@@ -80,15 +83,15 @@ export class AuthContainer {
 		const store = this.store;
 		const isValid = await this._storeRefresh({ state: this.store.state });
 		if (isValid) return true;
-		return this._renew(store);
+		return this._renew(store?.state);
 	}
 
 	/**
 	 * Logs out of the system by setting the value to null
 	 */
-	private async _renew(store: AuthStore): Promise<boolean> {
-		if (!store) return false;
-		const result = await this.options.provider.renew?.(store.state);
+	private async _renew(state: AuthState | undefined | null): Promise<boolean> {
+		if (!state) return false;
+		const result = await this.options.provider.renew?.(state);
 		if (!result) return false;
 		return this._storeRefresh(result);
 	}

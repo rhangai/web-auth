@@ -29,6 +29,8 @@ export type ProviderOAuthPasswordPayload = {
 	username: string;
 	password: string;
 	scope: string;
+	data?: Record<string, string>;
+	params?: Record<string, string>;
 };
 
 /**
@@ -45,15 +47,17 @@ export class ProviderOAuthPassword implements AuthProvider {
 		const data: Record<string, string | undefined | null> = {
 			client_id: this.options.clientId,
 			client_secret: this.options.clientSecret,
+			grant_type: "password",
 			scope: payload.scope,
+			username: payload.username,
+			password: payload.password,
+			...payload.data,
 		};
-		data.grant_type = "password";
-		data.username = payload.username;
-		data.password = payload.password;
 		const response = await this.options.axios({
 			method: "post",
 			url: this.options.tokenEndpoint,
 			data: ProviderOAuthPassword.toQueryString(data),
+			params: payload.params,
 			headers: { "content-type": "application/x-www-form-urlencoded" },
 		});
 		let expiresAt: number | null = null;

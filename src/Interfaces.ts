@@ -30,7 +30,7 @@ export interface AuthProvider {
 	 * Perform the login using the payload
 	 * @param payload
 	 */
-	login(payload: Record<string, string>): PromiseOrValue<AuthProviderLoginResult | null>;
+	login(payload: Record<string, any>): PromiseOrValue<AuthProviderLoginResult | null>;
 	/**
 	 * Do a logout
 	 */

@@ -2,10 +2,10 @@ type PromiseOrValue<T> = T | Promise<T>;
 
 // Basic types
 export type AuthState = Record<string, any>;
-export type AuthUser = Record<string, any>;
+export type AuthData = Record<string, any>;
 export type AuthStore = null | {
 	state: AuthState;
-	user: AuthUser;
+	data: AuthData;
 };
 
 /**
@@ -17,9 +17,9 @@ export type AuthProviderLoginResult = {
 	 */
 	state: AuthState;
 	/**
-	 * User
+	 * Data
 	 */
-	user?: AuthUser | null;
+	data?: AuthData | null;
 };
 
 /**
@@ -44,10 +44,10 @@ export interface AuthProvider {
 	 */
 	renew?(state: AuthState): PromiseOrValue<AuthProviderLoginResult | null>;
 	/**
-	 * Get the user according with the state
+	 * Get the data according with the state
 	 * @param state
 	 */
-	getUser(state: AuthState): PromiseOrValue<AuthUser | null>;
+	getData(state: AuthState): PromiseOrValue<AuthData | null>;
 }
 
 /**

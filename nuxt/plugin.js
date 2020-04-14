@@ -1,7 +1,7 @@
 import { AuthContainer } from "<%= options.lib %>";
 import AuthContainerConfig from "<%= options.config %>";
 
-export default async function(context, inject) {
+export default async function (context, inject) {
 	const authContainerConfig =
 		typeof AuthContainerConfig === "function"
 			? AuthContainerConfig(context)
@@ -27,16 +27,16 @@ function setupPlugins($auth, context) {
 			store.registerModule(storeName, {
 				namespaced: true,
 				state() {
-					return { user: null };
+					return { data: null };
 				},
 				mutations: {
-					SET_USER(state, payload) {
-						state.user = payload.user;
+					SET_DATA(state, payload) {
+						state.data = payload.data;
 					},
 				},
 			});
-			$auth.addPlugin(authStore => {
-				store.commit(storeName + "/SET_USER", { user: authStore ? authStore.user : null });
+			$auth.addPlugin((authStore) => {
+				store.commit(storeName + "/SET_DATA", { data: authStore ? authStore.data : null });
 			});
 		}
 	}
@@ -44,7 +44,7 @@ function setupPlugins($auth, context) {
 
 	/* <% if (options.plugins.axios) { %> */
 	{
-		$auth.addPlugin(authStore => {
+		$auth.addPlugin((authStore) => {
 			const axios = context.app.$axios;
 			if (!axios) return;
 			if (authStore) {
@@ -58,7 +58,7 @@ function setupPlugins($auth, context) {
 
 	/* <% if (options.plugins.apollo) { %> */
 	{
-		$auth.addPlugin(authStore => {
+		$auth.addPlugin((authStore) => {
 			const apolloHelpers = context.app.$apolloHelpers;
 			if (!apolloHelpers) return;
 			if (authStore) {

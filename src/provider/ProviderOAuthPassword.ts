@@ -9,8 +9,8 @@ export type ProviderOAuthPasswordOptions = {
 	tokenExpiresThreshold?: number;
 	/// Implements token refresh on OAUTH
 	tokenRefresh?: boolean;
-	/// Get the current user
-	getUser(state: ProviderOAuthPasswordState): Promise<Record<string, any>> | Record<string, any>;
+	/// Get the current data
+	getData(state: ProviderOAuthPasswordState): Promise<Record<string, any>> | Record<string, any>;
 };
 
 /**
@@ -73,9 +73,9 @@ export class ProviderOAuthPassword implements AuthProvider {
 		};
 	}
 
-	async getUser(state: ProviderOAuthPasswordState) {
-		const user = await this.options.getUser(state);
-		return user;
+	async getData(state: ProviderOAuthPasswordState) {
+		const data = await this.options.getData(state);
+		return data;
 	}
 
 	/// If the expiration time of the token

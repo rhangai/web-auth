@@ -3,7 +3,7 @@ import {
 	AuthStorage,
 	AuthPlugin,
 	AuthStore,
-	AuthUser,
+	AuthData,
 	AuthState,
 } from "./Interfaces";
 
@@ -15,7 +15,13 @@ export type AuthContainerOptions = {
 
 type AuthContainerSetStoreOptions = {
 	state?: AuthState | null;
-	user?: AuthUser | null;
+	data?: AuthData | null;
+};
+
+export type AuthContainerResult = {
+	isLogged: boolean;
+	state: AuthState | null;
+	data: AuthData | null;
 };
 
 /**
@@ -123,11 +129,11 @@ export class AuthContainer {
 			return false;
 		}
 		const state = store.state;
-		let user = store.user;
-		if (!user) {
-			user = await this._userGet(state);
+		let data = store.data;
+		if (!data) {
+			data = await this._dataGet(state);
 		}
-		await this._storeSet({ state, user });
+		await this._storeSet({ state, data });
 		return !!this.store;
 	}
 
@@ -136,10 +142,10 @@ export class AuthContainer {
 	 */
 	private async _storeSet(store: AuthContainerSetStoreOptions | null) {
 		this.storeInitValidUntil = null;
-		if (!store || !store.state || !store.user) {
+		if (!store || !store.state || !store.data) {
 			this.store = null;
 		} else {
-			this.store = { state: store.state, user: store.user };
+			this.store = { state: store.state, data: store.data };
 		}
 		if (this.store) {
 			await this.options.storage.save(this.store.state);
@@ -156,14 +162,14 @@ export class AuthContainer {
 		}
 	}
 	/**
-	 * Get the user from the state
+	 * Get the data from the state
 	 * @param state
 	 */
-	private async _userGet(state: any): Promise<any> {
+	private async _dataGet(state: any): Promise<any> {
 		if (!state) return null;
 		try {
-			const user = await this.options.provider.getUser(state);
-			return user;
+			const data = await this.options.provider.getData(state);
+			return data;
 		} catch (err) {
 			if (err.statusCode == 401 || err.statusCode == 403) {
 				return null;

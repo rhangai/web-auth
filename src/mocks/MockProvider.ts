@@ -2,7 +2,7 @@ import { AuthProvider } from "../Interfaces";
 
 export class MockProvider implements AuthProvider {
 	private stateValue: any = null;
-	private userValue: any = null;
+	private dataValue: any = null;
 
 	login(payload: any) {
 		return {
@@ -18,21 +18,21 @@ export class MockProvider implements AuthProvider {
 		};
 	}
 
-	getUser(state: any) {
-		if (typeof this.userValue === "function") return this.userValue(state);
-		return this.userValue;
+	getData(state: any) {
+		if (typeof this.dataValue === "function") return this.dataValue(state);
+		return this.dataValue;
 	}
 
 	state(state: any) {
 		this.stateValue = state ?? null;
 	}
 
-	user(user: any) {
-		this.userValue = user ?? null;
+	data(data: any) {
+		this.dataValue = data ?? null;
 	}
 
-	set(state: any, user?: any) {
+	set(state: any, data?: any) {
 		this.state(state);
-		this.user(user);
+		this.data(data);
 	}
 }

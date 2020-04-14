@@ -10,7 +10,7 @@ describe("AuthContainer", () => {
 		provider = new MockProvider();
 		authContainer = new AuthContainer({
 			provider: provider,
-			storage: new MockStorage({ $user: { fromStorage: true } }),
+			storage: new MockStorage({ $data: { fromStorage: true } }),
 		});
 		plugin = jest.fn(() => null);
 		authContainer.addPlugin(plugin as any);
@@ -38,12 +38,12 @@ describe("AuthContainer", () => {
 	});
 
 	it("should perform initialization from storage", async () => {
-		provider.user((state: any) => {
-			return state.$user;
+		provider.data((state: any) => {
+			return state.$data;
 		});
 		await authContainer.init();
-		expect(plugin.mock.calls[0][0]).toHaveProperty("user");
-		expect(plugin.mock.calls[0][0].user).toMatchObject({ fromStorage: true });
+		expect(plugin.mock.calls[0][0]).toHaveProperty("data");
+		expect(plugin.mock.calls[0][0].data).toMatchObject({ fromStorage: true });
 	});
 
 	it("should perform a logout", async () => {

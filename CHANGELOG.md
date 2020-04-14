@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/rhangai/web-auth/compare/v1.0.3...v1.1.0) (2020-04-14)
+
+
+### Features
+
+* AuthContainer methods now return an object indicating the state ([8e89d47](https://github.com/rhangai/web-auth/commit/8e89d4728ff55b6561d2e434ea26771a54c339e5))
+
 ### [1.0.3](https://github.com/rhangai/web-auth/compare/v1.0.2...v1.0.3) (2020-04-06)
 
 ### [1.0.2](https://github.com/rhangai/web-auth/compare/v1.0.1...v1.0.2) (2020-03-30)

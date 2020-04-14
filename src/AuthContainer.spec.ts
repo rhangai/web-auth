@@ -21,14 +21,14 @@ describe("AuthContainer", () => {
 
 	it("should perform a login", async () => {
 		provider.set({}, {});
-		const isValid = await authContainer.login({});
-		expect(isValid).toBe(true);
+		const { isLogged } = await authContainer.login({});
+		expect(isLogged).toBe(true);
 	});
 
 	it("should perform a login (invalid)", async () => {
 		provider.state(null);
-		const isValid = await authContainer.login({});
-		expect(isValid).toBe(false);
+		const { isLogged } = await authContainer.login({});
+		expect(isLogged).toBe(false);
 	});
 
 	it("should use plugins", async () => {
@@ -48,30 +48,32 @@ describe("AuthContainer", () => {
 
 	it("should perform a logout", async () => {
 		provider.set({}, {});
-		const isValid = await authContainer.login({});
-		expect(isValid).toBe(true);
+		const { isLogged } = await authContainer.login({});
+		expect(isLogged).toBe(true);
 		await authContainer.logout();
 	});
 
 	it("should perform refreshs", async () => {
 		provider.set({}, {});
-		const isValid = await authContainer.login({});
-		expect(isValid).toBe(true);
-		const isRefreshValid = await authContainer.refresh();
-		expect(isRefreshValid).toBe(true);
+		const { isLogged } = await authContainer.login({});
+		expect(isLogged).toBe(true);
+		const { isLogged: isLoggedRefresh } = await authContainer.refresh();
+		expect(isLoggedRefresh).toBe(true);
 	});
 
 	it("should perform refreshs (not logged)", async () => {
 		provider.set(null);
-		const isValid = await authContainer.refresh();
-		expect(isValid).toBe(false);
+		const { isLogged } = await authContainer.refresh();
+		expect(isLogged).toBe(false);
 	});
 
 	it("should perform refreshs (init)", async () => {
 		provider.set({}, {});
 		await authContainer.init();
-		const isValid = await authContainer.refresh();
-		expect(isValid).toBe(true);
+		const result = await authContainer.refresh();
+		expect(result).toHaveProperty("isLogged", true);
+		expect(result).toHaveProperty("state");
+		expect(result).toHaveProperty("data");
 	});
 
 	it("should perform refreshs (unauthorized)", async () => {
@@ -81,7 +83,9 @@ describe("AuthContainer", () => {
 			throw error;
 		});
 		await authContainer.init(false);
-		const isValid = await authContainer.refresh();
-		expect(isValid).toBe(false);
+		const result = await authContainer.refresh();
+		expect(result).toHaveProperty("isLogged", false);
+		expect(result).toHaveProperty("state", null);
+		expect(result).toHaveProperty("data", null);
 	});
 });

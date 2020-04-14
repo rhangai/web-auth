@@ -52,9 +52,10 @@ export class AuthContainer {
 	 * Perform th elogin
 	 * @param payload
 	 */
-	async login(payload: any): Promise<boolean> {
+	async login(payload: any): Promise<AuthContainerResult> {
 		const result = await this.options.provider.login(payload);
-		return this._storeRefresh(result);
+		const isLogged = await this._storeRefresh(result);
+		return this._getResult(isLogged);
 	}
 
 	/**
@@ -68,22 +69,32 @@ export class AuthContainer {
 	/**
 	 * Logs out of the system by setting the value to null
 	 */
-	async renew(): Promise<boolean> {
-		return this._renew(this.store?.state);
+	async renew(): Promise<AuthContainerResult> {
+		const isLogged = await this._renew(this.store?.state);
+		return this._getResult(isLogged);
 	}
 
 	/**
 	 * Refresh the current authenticator and ensures
 	 */
-	async refresh(): Promise<boolean> {
-		if (!this.store) return false;
+	async refresh(): Promise<AuthContainerResult> {
+		if (!this.store) return this._getResult(false);
 		if (this.storeInitValidUntil) {
 			const now = +new Date();
 			const isValidInit = now < this.storeInitValidUntil;
 			this.storeInitValidUntil = null;
-			if (isValidInit) return true;
+			if (isValidInit) return this._getResult(true);
 		}
-		return this._storeRefreshRenew(this.store?.state);
+		const isLogged = await this._storeRefreshRenew(this.store?.state);
+		return this._getResult(isLogged);
+	}
+
+	private _getResult(isLogged: boolean): AuthContainerResult {
+		return {
+			isLogged,
+			state: this.store?.state ?? null,
+			data: this.store?.data ?? null,
+		};
 	}
 
 	/**
